@@ -1,9 +1,31 @@
+addTimeBadges();
+
+function addTimeBadges() {
+    console.log("Adding time badges...")
+    document.querySelectorAll('.game-cover').forEach((gameCover) => {
+
+        const gameTitle = gameCover.querySelector('.game-text-centered')?.textContent;
+        if (!gameTitle) {
+            return;
+        }
+        chrome.runtime.sendMessage( //goes to bg_page.js
+            "https://hltb-proxy.fly.dev/v1/query?title=" + gameTitle,
+            function (response: HLTBResponse) {
+                if (response.length > 0 && response[0].beatTime.main.avgSeconds > 0) {
+                    addBadge(gameCover as HTMLElement, response[0]);
+                }
+            }
+        );
+
+    });
+}
+
 function addBadge(parentElement: HTMLElement, hltbData: HLTBData) {
     const badgeDiv = document.createElement('div');
     badgeDiv.classList.add('time-badge');
     badgeDiv.innerText = formatHours(hltbData.beatTime.main.avgSeconds / 3600) + ' h';
     badgeDiv.title = hltbData.gameName
-        + '\nMain Story: ' + formatHours(hltbData.beatTime.main.avgSeconds / 3600) + ' Hours'
+        + '\n\nMain Story: ' + formatHours(hltbData.beatTime.main.avgSeconds / 3600) + ' Hours'
         + '\nMain + Sides: ' + formatHours(hltbData.beatTime.extra.avgSeconds / 3600) + ' Hours'
         + '\nCompletionist: ' + formatHours(hltbData.beatTime.completionist.avgSeconds / 3600) + ' Hours'
         + '\nAll Styles: ' + formatHours(hltbData.beatTime.all.avgSeconds / 3600) + ' Hours';
@@ -22,6 +44,7 @@ function formatHours(hours: number, tolerance: number = 0.1): string {
     }
 }
 
+
 type HLTBResponse = HLTBData[];
 type HLTBData = {
     gameName: string,
@@ -33,19 +56,5 @@ type HLTBData = {
     }
 };
 
-document.querySelectorAll('.game-cover').forEach((gameCover) => {
 
-    const gameTitle = gameCover.querySelector('.game-text-centered')?.textContent;
-    if (!gameTitle) {
-        return;
-    }
-    chrome.runtime.sendMessage( //goes to bg_page.js
-        "https://hltb-proxy.fly.dev/v1/query?title=" + gameTitle,
-        function (response: HLTBResponse) {
-            if (response.length > 0 && response[0].beatTime.main.avgSeconds > 0) {
-                addBadge(gameCover as HTMLElement, response[0]);
-            }
-        }
-    );
 
-});
