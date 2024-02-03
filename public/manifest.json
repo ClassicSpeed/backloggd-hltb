@@ -1,0 +1,27 @@
+{
+  "name": "HLTB Extension for Backloggd",
+  "description": "This extension shows the normal beat time for Backloggd",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["badge.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "css": ["style.css"]
+    }
+  ]
+}
