@@ -16,7 +16,7 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["badge.js"],
+      "js": ["time-badge.js"],
       "run_at": "document_idle"
     },
     {
