@@ -6,8 +6,7 @@ chrome.runtime.onMessage.addListener(
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
-        })
-            .then(response => response.json()).then(value => onSuccess(value));
+        }).then(response => response.json()).then(value => onSuccess(value));
 
         return true;
     }
