@@ -13,14 +13,12 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
+  "host_permissions": ["https://hltb-proxy.fly.dev/*"],
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
+      "matches": ["https://www.backloggd.com/*"],
       "js": ["time-badge.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["<all_urls>"],
+      "run_at": "document_idle",
       "css": ["style.css"]
     }
   ]
