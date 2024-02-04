@@ -11,3 +11,15 @@ chrome.runtime.onMessage.addListener(
         return true;
     }
 );
+
+chrome.runtime.onInstalled.addListener(function () {
+
+    chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
+        console.log(JSON.stringify(changeInfo));
+        if (changeInfo.status === 'complete') {
+            chrome.tabs.sendMessage(tabId, {
+                message: 'TabUpdated'
+            });
+        }
+    })
+});

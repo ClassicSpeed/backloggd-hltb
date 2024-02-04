@@ -1,7 +1,13 @@
-addTimeBadges();
+chrome.runtime.onMessage.addListener(function (request) {
+    if (request.message === 'TabUpdated') {
+        setTimeout(() => {
+            addTimeBadges();
+        }, 2500);
+    }
+})
+
 
 function addTimeBadges() {
-    console.log("Adding time badges...")
     document.querySelectorAll('.game-cover').forEach((gameCover) => {
 
         const gameTitle = gameCover.querySelector('.game-text-centered')?.textContent;
