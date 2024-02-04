@@ -1,5 +1,5 @@
 chrome.runtime.onMessage.addListener(
-    function (url, sender, onSuccess) {
+    (url, sender, onSuccess) => {
         fetch(url, {
             method: "GET",
             headers: {
@@ -12,14 +12,10 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-chrome.runtime.onInstalled.addListener(function () {
-
-    chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
-        console.log(JSON.stringify(changeInfo));
-        if (changeInfo.status === 'complete') {
-            chrome.tabs.sendMessage(tabId, {
-                message: 'TabUpdated'
-            });
-        }
-    })
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.status === 'complete') {
+        chrome.tabs.sendMessage(tabId, {
+            message: 'TabUpdated'
+        });
+    }
 });

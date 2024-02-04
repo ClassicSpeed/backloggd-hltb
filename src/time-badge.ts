@@ -1,10 +1,26 @@
 chrome.runtime.onMessage.addListener(function (request) {
     if (request.message === 'TabUpdated') {
-        setTimeout(() => {
-            addTimeBadges();
-        }, 2500);
+        setTimeout(checkAndAddTimeBadges, 500);
     }
 })
+
+
+
+let attempts = 0;
+function checkAndAddTimeBadges() {
+    const progressBar = document.querySelector('.turbolinks-progress-bar');
+
+    if (progressBar && attempts < 10) {
+        console.log(`Tried ${attempts+1} times...`)
+        attempts++;
+        setTimeout(checkAndAddTimeBadges, 500); // Check again in 500 milliseconds
+    } else if (!progressBar) {
+        console.log("Adding badges!");
+        addTimeBadges(); // Call addTimeBadges when the progress bar is not found
+    } else {
+        console.log("Tried 10 times but couldn't find the progress bar.");
+    }
+}
 
 
 function addTimeBadges() {
