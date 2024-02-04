@@ -4,21 +4,17 @@ chrome.runtime.onMessage.addListener(function (request) {
     }
 })
 
-
-
+//Temporal workaround to know when the page finished loading
 let attempts = 0;
 function checkAndAddTimeBadges() {
     const progressBar = document.querySelector('.turbolinks-progress-bar');
-
     if (progressBar && attempts < 10) {
-        console.log(`Tried ${attempts+1} times...`)
         attempts++;
-        setTimeout(checkAndAddTimeBadges, 500); // Check again in 500 milliseconds
+        setTimeout(checkAndAddTimeBadges, 500);
     } else if (!progressBar) {
-        console.log("Adding badges!");
-        addTimeBadges(); // Call addTimeBadges when the progress bar is not found
+        addTimeBadges();
     } else {
-        console.log("Tried 10 times but couldn't find the progress bar.");
+        console.error("The Page didn't load in time...");
     }
 }
 
@@ -30,7 +26,7 @@ function addTimeBadges() {
         if (!gameTitle) {
             return;
         }
-        chrome.runtime.sendMessage( //goes to bg_page.js
+        chrome.runtime.sendMessage(
             "https://hltb-proxy.fly.dev/v1/query?title=" + gameTitle,
             function (response: HLTBResponse) {
                 if (response.length > 0 && response[0].beatTime.main.avgSeconds > 0) {
