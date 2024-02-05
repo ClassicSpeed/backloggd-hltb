@@ -12,9 +12,6 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
-  "host_permissions": [
-    "https://hltb-proxy.fly.dev/*"
-  ],
   "icons": {
     "128": "icons/icon128.png"
   },
