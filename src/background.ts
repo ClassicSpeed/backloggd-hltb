@@ -70,12 +70,8 @@ chrome.runtime.onInstalled.addListener(function () {
 
 chrome.contextMenus.onClicked.addListener(function (info) {
     if (info.menuItemId === "enableExtension") {
-        chrome.storage.sync.set({"enableExtension": info.checked}, function () {
-            console.log("The extension is now " + (info.checked ? "enabled" : "disabled"));
-        });
+        chrome.storage.sync.set({"enableExtension": info.checked}).then();
     } else if (info.parentMenuItemId === "timeType" && !info.wasChecked) {
-        chrome.storage.sync.set({"timeType": info.menuItemId}, function () {
-            console.log("The time to track is now " + info.menuItemId);
-        });
+        chrome.storage.sync.set({"timeType": info.menuItemId}).then();
     }
 });

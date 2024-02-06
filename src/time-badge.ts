@@ -1,6 +1,11 @@
 chrome.runtime.onMessage.addListener(function (request) {
     if (request.message === 'TabUpdated') {
-        setTimeout(checkAndAddTimeBadges, 500);
+        chrome.storage.sync.get({enableExtension: true}, (storage) => {
+            if (storage.enableExtension) {
+                setTimeout(checkAndAddTimeBadges, 500);
+            }
+        });
+
     }
 })
 
@@ -19,6 +24,15 @@ function checkAndAddTimeBadges() {
     }
 }
 
+
+function refreshTimeBadges() {
+    deleteTimeBadges();
+    addTimeBadges();
+}
+
+function deleteTimeBadges() {
+    document.querySelectorAll('.time-badge').forEach(timeBadge => timeBadge.remove());
+}
 
 function addTimeBadges() {
     chrome.storage.sync.get({timeType: "main"}, storage => {
@@ -66,3 +80,20 @@ function addBadge(parentElement: HTMLElement, hltbGame: HLTBGame, timeType: stri
     parentElement.appendChild(badgeDiv);
 }
 
+
+chrome.storage.onChanged.addListener(function (changes) {
+    if ("enableExtension" in changes) {
+        if (changes.enableExtension.newValue) {
+            addTimeBadges();
+        } else {
+            deleteTimeBadges();
+        }
+    } else if ("timeType" in changes && changes.timeType.oldValue != changes.timeType.newValue) {
+
+        chrome.storage.sync.get({enableExtension: true}, (storage) => {
+            if (storage.enableExtension) {
+                refreshTimeBadges();
+            }
+        });
+    }
+});

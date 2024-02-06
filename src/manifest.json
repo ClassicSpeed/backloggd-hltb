@@ -4,7 +4,9 @@
   "version": "0.1",
   "manifest_version": 3,
   "permissions": [
-    "tabs", "contextMenus", "storage"
+    "tabs",
+    "contextMenus",
+    "storage"
   ],
   "background": {
     "service_worker": "background.js"
