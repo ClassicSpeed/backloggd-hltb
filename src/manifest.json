@@ -21,7 +21,8 @@
         "https://www.backloggd.com/*"
       ],
       "js": [
-        "time-badge.js"
+        "time-badge.js",
+        "hltb-game.js"
       ],
       "run_at": "document_idle",
       "css": [
