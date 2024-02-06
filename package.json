@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --build && copyfiles -u 1 src/**/*.!(ts) dist",
+    "build:chrome": "npm run build:shared && renamer dist/manifest-chrome.json --replace manifest.json && rimraf ./dist/manifest-firefox.json",
+    "build:firefox": "npm run build:shared && renamer dist/manifest-firefox.json --replace manifest.json && rimraf ./dist/manifest-chrome.json",
+    "build:shared": "npm run clean && tsc --build && copyfiles -u 1 src/**/*.!(ts) dist",
     "clean": "rimraf ./dist"
   },
   "keywords": [],
@@ -12,17 +14,17 @@
   "license": "ISC",
   "devDependencies": {
     "@types/chrome": "^0.0.260",
+    "@types/firefox-webext-browser": "^120.0.0",
     "copy-webpack-plugin": "^12.0.2",
     "copyfiles": "^2.4.1",
     "css-loader": "^6.10.0",
     "mini-css-extract-plugin": "^2.8.0",
+    "renamer": "^5.0.0",
+    "rimraf": "^5.0.5",
     "style-loader": "^3.3.4",
     "ts-loader": "^9.5.1",
     "typescript": "^5.3.3",
     "webpack": "^5.90.1",
     "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "rimraf": "^5.0.5"
   }
 }

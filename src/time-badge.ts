@@ -1,6 +1,7 @@
-chrome.runtime.onMessage.addListener(function (request) {
+let genericBrowser2 = chrome ? chrome : browser;
+genericBrowser2.runtime.onMessage.addListener(function (request) {
     if (request.message === 'TabUpdated') {
-        chrome.storage.sync.get({enableExtension: true}, (storage) => {
+        genericBrowser2.storage.sync.get({enableExtension: true}).then(storage =>  {
             if (storage.enableExtension) {
                 setTimeout(checkAndAddTimeBadges, 500);
             }
@@ -35,7 +36,7 @@ function deleteTimeBadges() {
 }
 
 function addTimeBadges() {
-    chrome.storage.sync.get({timeType: "main"}, storage => {
+    genericBrowser2.storage.sync.get({timeType: "main"}).then(storage =>  {
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
             const gameTitle = gameCover.querySelector('.game-text-centered')?.textContent;
             if (!gameTitle) {
@@ -79,7 +80,7 @@ function addBadge(parentElement: HTMLElement, hltbGame: HLTBGame, timeType: stri
 }
 
 
-chrome.storage.onChanged.addListener(function (changes) {
+genericBrowser2.storage.onChanged.addListener(function (changes) {
     if ("enableExtension" in changes) {
         if (changes.enableExtension.newValue) {
             addTimeBadges();
@@ -87,7 +88,7 @@ chrome.storage.onChanged.addListener(function (changes) {
             deleteTimeBadges();
         }
     } else if ("timeType" in changes && changes.timeType.oldValue != changes.timeType.newValue) {
-        chrome.storage.sync.get({enableExtension: true}, (storage) => {
+        genericBrowser2.storage.sync.get({enableExtension: true}).then(storage =>  {
             if (storage.enableExtension) {
                 refreshTimeBadges();
             }
