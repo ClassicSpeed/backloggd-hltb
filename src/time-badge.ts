@@ -14,13 +14,13 @@ let attempts = 0;
 
 function checkAndAddTimeBadges() {
     const progressBar = document.querySelector('.turbolinks-progress-bar');
-    if (progressBar && attempts < 10) {
+    if (progressBar && attempts < 20) {
         attempts++;
         setTimeout(checkAndAddTimeBadges, 500);
     } else if (!progressBar) {
         addTimeBadges();
     } else {
-        console.error("The Page didn't load in time...");
+        console.info("The Page didn't load in time...");
     }
 }
 
@@ -41,14 +41,12 @@ function addTimeBadges() {
             if (!gameTitle) {
                 return;
             }
-            chrome.runtime.sendMessage(
-                "https://hltb-proxy.fly.dev/v1/query?title=" + gameTitle,
+            fetch("https://hltb-proxy.fly.dev/v1/query?title=" + gameTitle).then(response => response.json()).then(
                 function (response: HLTBResponse) {
                     if (response.length > 0 && response[0].beatTime.main.avgSeconds > 0) {
                         addBadge(gameCover as HTMLElement, new HLTBGame(response[0]), storage.timeType);
                     }
-                }
-            );
+                });
 
         });
     });

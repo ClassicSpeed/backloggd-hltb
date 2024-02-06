@@ -1,9 +1,4 @@
-chrome.runtime.onMessage.addListener(
-    (url, sender, onSuccess) => {
-        fetch(url).then(response => response.json()).then(value => onSuccess(value));
-        return true;
-    }
-);
+
 chrome.tabs.onUpdated.addListener((tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
     if (tab?.url?.match('https:\/\/.*.backloggd.com\/.*') && changeInfo.status === 'complete') {
         chrome.tabs.sendMessage(tabId, {
@@ -14,7 +9,7 @@ chrome.tabs.onUpdated.addListener((tabId: number, changeInfo: chrome.tabs.TabCha
 
 
 chrome.runtime.onInstalled.addListener(function () {
-    chrome.storage.sync.get({enableExtension: true}, (storage) => {
+    chrome.storage.sync.get({enableExtension: true, timeType: "main"}, (storage) => {
         chrome.contextMenus.create({
             id: "enableExtension",
             type: "checkbox",
@@ -22,9 +17,6 @@ chrome.runtime.onInstalled.addListener(function () {
             contexts: ["action"],
             checked: storage.enableExtension
         });
-    });
-
-    chrome.storage.sync.get({timeType: "main"}, (storage) => {
         chrome.contextMenus.create({
             id: "timeType",
             title: "Default HLTB time to show",
@@ -66,12 +58,13 @@ chrome.runtime.onInstalled.addListener(function () {
 
     });
 
-});
+    chrome.contextMenus.onClicked.addListener(function (info) {
+        if (info.menuItemId === "enableExtension") {
+            chrome.storage.sync.set({"enableExtension": info.checked}).then();
+        } else if (info.parentMenuItemId === "timeType" && !info.wasChecked) {
+            chrome.storage.sync.set({"timeType": info.menuItemId}).then();
+        }
+    });
 
-chrome.contextMenus.onClicked.addListener(function (info) {
-    if (info.menuItemId === "enableExtension") {
-        chrome.storage.sync.set({"enableExtension": info.checked}).then();
-    } else if (info.parentMenuItemId === "timeType" && !info.wasChecked) {
-        chrome.storage.sync.set({"timeType": info.menuItemId}).then();
-    }
+
 });
