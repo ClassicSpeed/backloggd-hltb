@@ -4,7 +4,7 @@
   "version": "0.1",
   "manifest_version": 3,
   "permissions": [
-    "tabs"
+    "tabs", "contextMenus", "storage"
   ],
   "background": {
     "service_worker": "background.js"
@@ -29,5 +29,10 @@
         "style.css"
       ]
     }
-  ]
+  ],
+  "action": {
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  }
 }
