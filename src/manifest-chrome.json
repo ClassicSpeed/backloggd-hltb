@@ -1,7 +1,7 @@
 {
   "name": "HLTB Extension for Backloggd",
   "description": "This extension shows the normal beat time for Backloggd",
-  "version": "0.2",
+  "version": "0.3",
   "manifest_version": 3,
   "permissions": [
     "tabs",
