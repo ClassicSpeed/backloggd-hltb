@@ -87,7 +87,6 @@ chrome.storage.onChanged.addListener(function (changes) {
             deleteTimeBadges();
         }
     } else if ("timeType" in changes && changes.timeType.oldValue != changes.timeType.newValue) {
-
         chrome.storage.sync.get({enableExtension: true}, (storage) => {
             if (storage.enableExtension) {
                 refreshTimeBadges();
