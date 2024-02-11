@@ -1,4 +1,7 @@
 let genericBrowser2 = chrome ? chrome : browser;
+const gameCache: Record<string, HLTBGame> = {}
+addTimeBadges();
+
 const mutationCallback = (mutationsList: MutationRecord[]) => {
     mutationsList.forEach(({addedNodes}) => {
         Array.from(addedNodes).forEach(node => {
@@ -17,8 +20,6 @@ const targetNode = document.documentElement;
 const config = {childList: true, subtree: true};
 observer.observe(targetNode, config);
 
-
-addTimeBadges();
 
 function refreshTimeBadges() {
     deleteTimeBadges();
@@ -49,12 +50,15 @@ function addTimeBadges() {
 }
 
 async function fetchGameData(gameTitle: string): Promise<HLTBGame | undefined> {
-    const response = await fetch(`https://hltb-proxy.fly.dev/v1/query?title=${gameTitle}`);
-    const data: HLTBResponse | undefined = await response.json();
-    if (!data || data.length === 0 || data[0].beatTime.main.avgSeconds <= 0) {
-        return undefined;
+    if (!(gameTitle in gameCache)) {
+        const response = await fetch(`https://hltb-proxy.fly.dev/v1/query?title=${gameTitle}`);
+        const data: HLTBResponse | undefined = await response.json();
+        if (!data || data.length === 0 || data[0].beatTime.main.avgSeconds <= 0) {
+            return undefined;
+        }
+        gameCache[gameTitle] = new HLTBGame(data[0]);
     }
-    return new HLTBGame(data[0]);
+    return gameCache[gameTitle];
 }
 
 
