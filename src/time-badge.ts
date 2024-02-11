@@ -1,30 +1,28 @@
 let genericBrowser2 = chrome ? chrome : browser;
-genericBrowser2.runtime.onMessage.addListener(function (request) {
-    if (request.message === 'TabUpdated') {
-        genericBrowser2.storage.sync.get({enableExtension: true}).then(storage =>  {
-            if (storage.enableExtension) {
-                setTimeout(checkAndAddTimeBadges, 500);
+const mutationCallback = (mutationsList: MutationRecord[]) => {
+    for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+            const addedNodes = Array.from(mutation.addedNodes);
+            for (const node of addedNodes) {
+                if (node instanceof HTMLElement) {
+                    const gameCovers = node.querySelectorAll('.game-cover');
+                    if (gameCovers.length > 0 && mutation.previousSibling instanceof HTMLElement && mutation.previousSibling.classList.contains('turbolinks-progress-bar')) {
+                        refreshTimeBadges();
+                    }
+                }
             }
-        });
-
+        }
     }
-})
+};
+const observer = new MutationObserver(mutationCallback);
+const targetNode = document.documentElement;
+const config = {childList: true, subtree: true};
+observer.observe(targetNode, config);
 
-//Temporal workaround to know when the page finished loading
-let attempts = 0;
 
-function checkAndAddTimeBadges() {
-    const progressBar = document.querySelector('.turbolinks-progress-bar');
-    if (progressBar && attempts < 20) {
-        attempts++;
-        setTimeout(checkAndAddTimeBadges, 500);
-    } else if (!progressBar) {
-        addTimeBadges();
-    } else {
-        console.info("The Page didn't load in time...");
-    }
-}
 
+
+addTimeBadges();
 
 function refreshTimeBadges() {
     deleteTimeBadges();
@@ -36,16 +34,20 @@ function deleteTimeBadges() {
 }
 
 function addTimeBadges() {
-    genericBrowser2.storage.sync.get({timeType: "main"}).then(storage =>  {
+    genericBrowser2.storage.sync.get({timeType: "main"}).then(storage => {
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
             const gameTitle = gameCover.querySelector('.game-text-centered')?.textContent;
             if (!gameTitle) {
                 return;
             }
+
+            const timeBadge = createBadge(gameCover as HTMLElement);
             fetch("https://hltb-proxy.fly.dev/v1/query?title=" + gameTitle).then(response => response.json()).then(
                 function (response: HLTBResponse) {
                     if (response.length > 0 && response[0].beatTime.main.avgSeconds > 0) {
-                        addBadge(gameCover as HTMLElement, new HLTBGame(response[0]), storage.timeType);
+                        addTimeToBadge(timeBadge as HTMLDivElement, new HLTBGame(response[0]), storage.timeType);
+                    } else {
+                        deleteBadge(timeBadge);
                     }
                 });
 
@@ -53,8 +55,21 @@ function addTimeBadges() {
     });
 }
 
-function addBadge(parentElement: HTMLElement, hltbGame: HLTBGame, timeType: string) {
+
+function createBadge(parentElement: HTMLElement) {
     const badgeDiv = document.createElement('div');
+    badgeDiv.classList.add('time-badge');
+    badgeDiv.title = 'Loading...'
+    badgeDiv.innerText = ' - ';
+    parentElement.appendChild(badgeDiv);
+    return badgeDiv;
+}
+
+function deleteBadge(badgeDiv: HTMLDivElement) {
+    badgeDiv.remove();
+}
+
+function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: string) {
     badgeDiv.classList.add('time-badge');
     switch (timeType) {
         case "main":
@@ -76,7 +91,6 @@ function addBadge(parentElement: HTMLElement, hltbGame: HLTBGame, timeType: stri
         + `\n- Main + Sides: ${hltbGame.extraBeatTime} Hours`
         + `\n- Completionist: ${hltbGame.completionistBeatTime} Hours`
         + `\n- All Styles: ${hltbGame.allBeatTime} Hours`;
-    parentElement.appendChild(badgeDiv);
 }
 
 
@@ -88,7 +102,7 @@ genericBrowser2.storage.onChanged.addListener(function (changes) {
             deleteTimeBadges();
         }
     } else if ("timeType" in changes && changes.timeType.oldValue != changes.timeType.newValue) {
-        genericBrowser2.storage.sync.get({enableExtension: true}).then(storage =>  {
+        genericBrowser2.storage.sync.get({enableExtension: true}).then(storage => {
             if (storage.enableExtension) {
                 refreshTimeBadges();
             }

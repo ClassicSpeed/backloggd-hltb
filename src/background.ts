@@ -1,11 +1,4 @@
 let genericBrowser = chrome ? chrome : browser;
-chrome.tabs.onUpdated.addListener((tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-    if (tab?.url?.match('https:\/\/.*.backloggd.com\/.*') && changeInfo.status === 'complete') {
-        genericBrowser.tabs.sendMessage(tabId, {
-            message: 'TabUpdated'
-        }).then();
-    }
-});
 
 
 genericBrowser.runtime.onInstalled.addListener(function () {
