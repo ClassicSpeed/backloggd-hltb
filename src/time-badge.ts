@@ -1,25 +1,21 @@
 let genericBrowser2 = chrome ? chrome : browser;
 const mutationCallback = (mutationsList: MutationRecord[]) => {
-    for (const mutation of mutationsList) {
-        if (mutation.type === 'childList') {
-            const addedNodes = Array.from(mutation.addedNodes);
-            for (const node of addedNodes) {
-                if (node instanceof HTMLElement) {
-                    const gameCovers = node.querySelectorAll('.game-cover');
-                    if (gameCovers.length > 0 && mutation.previousSibling instanceof HTMLElement && mutation.previousSibling.classList.contains('turbolinks-progress-bar')) {
-                        refreshTimeBadges();
-                    }
+    mutationsList.forEach(({addedNodes}) => {
+        Array.from(addedNodes).forEach(node => {
+            if (node instanceof HTMLElement) {
+                const gameCovers = node.querySelectorAll('.game-cover');
+                const hasProgressBar = node.previousElementSibling?.classList.contains('turbolinks-progress-bar');
+                if (gameCovers.length > 0 && hasProgressBar) {
+                    refreshTimeBadges();
                 }
             }
-        }
-    }
+        });
+    });
 };
 const observer = new MutationObserver(mutationCallback);
 const targetNode = document.documentElement;
 const config = {childList: true, subtree: true};
 observer.observe(targetNode, config);
-
-
 
 
 addTimeBadges();
@@ -37,22 +33,28 @@ function addTimeBadges() {
     genericBrowser2.storage.sync.get({timeType: "main"}).then(storage => {
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
             const gameTitle = gameCover.querySelector('.game-text-centered')?.textContent;
-            if (!gameTitle) {
-                return;
-            }
+            if (!gameTitle) return;
 
-            const timeBadge = createBadge(gameCover as HTMLElement);
-            fetch("https://hltb-proxy.fly.dev/v1/query?title=" + gameTitle).then(response => response.json()).then(
-                function (response: HLTBResponse) {
-                    if (response.length > 0 && response[0].beatTime.main.avgSeconds > 0) {
-                        addTimeToBadge(timeBadge as HTMLDivElement, new HLTBGame(response[0]), storage.timeType);
+            const badgeDiv = createBadge(gameCover as HTMLElement);
+            fetchGameData(gameTitle)
+                .then(response => {
+                    if (response) {
+                        addTimeToBadge(badgeDiv, response, storage.timeType);
                     } else {
-                        deleteBadge(timeBadge);
+                        deleteBadge(badgeDiv);
                     }
                 });
-
         });
     });
+}
+
+async function fetchGameData(gameTitle: string): Promise<HLTBGame | undefined> {
+    const response = await fetch(`https://hltb-proxy.fly.dev/v1/query?title=${gameTitle}`);
+    const data: HLTBResponse | undefined = await response.json();
+    if (!data || data.length === 0 || data[0].beatTime.main.avgSeconds <= 0) {
+        return undefined;
+    }
+    return new HLTBGame(data[0]);
 }
 
 
