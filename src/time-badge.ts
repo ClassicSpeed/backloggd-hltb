@@ -33,7 +33,7 @@ function deleteTimeBadges() {
 function addTimeBadges() {
     genericBrowser2.storage.sync.get({timeType: "main"}).then(storage => {
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
-            const gameTitle = gameCover.querySelector('.game-text-centered')?.textContent;
+            const gameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
             if (!gameTitle) return;
 
             const badgeDiv = createBadge(gameCover as HTMLElement);
