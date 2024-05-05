@@ -2,6 +2,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.5] - 2024-05-05
+
+### Added
+- Added time badges to other covers (like search items and a game's main page)
+
 ## [0.4] - 2024-02-11
 
 ### Added
