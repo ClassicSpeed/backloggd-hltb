@@ -2,6 +2,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.6] - 2024-05-28
+
+### Changed
+- Fixed extension menu not working on Firefox
+
 ## [0.5] - 2024-05-05
 
 ### Added
