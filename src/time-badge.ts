@@ -31,7 +31,14 @@ function deleteTimeBadges() {
 }
 
 function addTimeBadges() {
-    genericBrowser2.storage.sync.get({timeType: "main", badgePosition: "topRight"}).then(storage => {
+    genericBrowser2.storage.sync.get({
+        timeType: "main",
+        badgePosition: "topRight",
+        enableExtension: true
+    }).then(storage => {
+        if (!storage.enableExtension) {
+            return;
+        }
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
             const gameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
             if (!gameTitle) return;

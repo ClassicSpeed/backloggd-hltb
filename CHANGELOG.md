@@ -1,6 +1,10 @@
 
 # Change Log
 All notable changes to this project will be documented in this file.
+## [0.8] - 2024-07-02
+
+### Changed
+- Fixed extension enable option not disable the extension correctly
 
 ## [0.7] - 2024-07-02
 

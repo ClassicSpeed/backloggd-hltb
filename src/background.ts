@@ -48,12 +48,12 @@ genericBrowser.storage.sync.get({enableExtension: true, timeType: "main", badgeP
         contexts: ["action"]
     });
 
-
     genericBrowser.contextMenus.create({
         id: "badgePosition",
         title: "Badge position",
         contexts: ["action"]
     });
+
     genericBrowser.contextMenus.create({
         id: "topRight",
         checked: "topRight" === storage.badgePosition,
@@ -95,11 +95,11 @@ genericBrowser.storage.sync.get({enableExtension: true, timeType: "main", badgeP
 genericBrowser.runtime.onInstalled.addListener(function () {
     genericBrowser.contextMenus.onClicked.addListener(function (info) {
         if (info.menuItemId === "enableExtension") {
-            chrome.storage.sync.set({"enableExtension": info.checked}).then();
+            genericBrowser.storage.sync.set({"enableExtension": info.checked}).then();
         } else if (info.parentMenuItemId === "timeType" && !info.wasChecked) {
-            chrome.storage.sync.set({"timeType": info.menuItemId}).then();
+            genericBrowser.storage.sync.set({"timeType": info.menuItemId}).then();
         } else if (info.parentMenuItemId === "badgePosition" && !info.wasChecked) {
-            chrome.storage.sync.set({"badgePosition": info.menuItemId}).then();
+            genericBrowser.storage.sync.set({"badgePosition": info.menuItemId}).then();
         }
     });
 });
