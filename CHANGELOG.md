@@ -1,6 +1,13 @@
 
 # Change Log
 All notable changes to this project will be documented in this file.
+
+
+## [1.0] - 2024-07-02
+
+### Changed
+- Fixed menu not working after restarting the browser
+
 ## [0.8] - 2024-07-02
 
 ### Changed

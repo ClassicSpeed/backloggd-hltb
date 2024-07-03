@@ -7,7 +7,7 @@
 
 ⏳ You can hover your mouse on the time badge to know others times like extras and 100%
 
-⚙️ You can also select the default type of time to show (story, completionist, etc) by right-clicking the extension icon.
+⚙️ You can also select the default type of time to show (story, completionist, etc) and the badge position by right-clicking the extension icon.
 
 👨🏻‍💻 The extension is open source: https://github.com/ClassicSpeed/backloggd-hltb and any feedback is appreciated!
 
