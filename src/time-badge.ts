@@ -31,16 +31,16 @@ function deleteTimeBadges() {
 }
 
 function addTimeBadges() {
-    genericBrowser2.storage.sync.get({timeType: "main"}).then(storage => {
+    genericBrowser2.storage.sync.get({timeType: "main", badgePosition: "topRight"}).then(storage => {
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
             const gameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
             if (!gameTitle) return;
 
-            const badgeDiv = createBadge(gameCover as HTMLElement);
+            const badgeDiv = createBadge(gameCover as HTMLElement, storage.badgePosition);
             fetchGameData(gameTitle)
                 .then(response => {
                     if (response) {
-                        addTimeToBadge(badgeDiv, response, storage.timeType);
+                        addTimeToBadge(badgeDiv, response, storage.timeType, storage.badgePosition);
                     } else {
                         deleteBadge(badgeDiv);
                     }
@@ -63,9 +63,11 @@ async function fetchGameData(gameTitle: string): Promise<HLTBGame | null> {
 }
 
 
-function createBadge(parentElement: HTMLElement) {
+function createBadge(parentElement: HTMLElement, badgePosition: string) {
     const badgeDiv = document.createElement('div');
     badgeDiv.classList.add('time-badge');
+    addClassByPosition(badgePosition, badgeDiv);
+
     badgeDiv.title = 'Loading...'
     badgeDiv.innerText = ' - ';
     parentElement.appendChild(badgeDiv);
@@ -76,8 +78,27 @@ function deleteBadge(badgeDiv: HTMLDivElement) {
     badgeDiv.remove();
 }
 
-function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: string) {
+function addClassByPosition(badgePosition: string, badgeDiv: HTMLDivElement) {
+    switch (badgePosition) {
+        case "topRight":
+            badgeDiv.classList.add('time-badge-top-right');
+            break;
+        case "topLeft":
+            badgeDiv.classList.add('time-badge-top-left');
+            break;
+        case "bottomRight":
+            badgeDiv.classList.add('time-badge-bottom-right');
+            break;
+        case "bottomLeft":
+            badgeDiv.classList.add('time-badge-bottom-left');
+            break;
+    }
+}
+
+function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: string, badgePosition: string) {
     badgeDiv.classList.add('time-badge');
+    addClassByPosition(badgePosition, badgeDiv);
+
     switch (timeType) {
         case "main":
             badgeDiv.innerText = hltbGame.mainBeatTime + ' h';
@@ -108,7 +129,8 @@ genericBrowser2.storage.onChanged.addListener(function (changes) {
         } else {
             deleteTimeBadges();
         }
-    } else if ("timeType" in changes && changes.timeType.oldValue != changes.timeType.newValue) {
+    } else if (("timeType" in changes && changes.timeType.oldValue != changes.timeType.newValue) ||
+        ("badgePosition" in changes && changes.badgePosition.oldValue != changes.badgePosition.newValue)) {
         genericBrowser2.storage.sync.get({enableExtension: true}).then(storage => {
             if (storage.enableExtension) {
                 refreshTimeBadges();

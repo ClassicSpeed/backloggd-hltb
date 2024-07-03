@@ -1,7 +1,7 @@
 let genericBrowser = chrome ? chrome : browser;
 
 
-genericBrowser.storage.sync.get({enableExtension: true, timeType: "main"}).then(storage => {
+genericBrowser.storage.sync.get({enableExtension: true, timeType: "main", badgePosition: "topRight"}).then(storage => {
     genericBrowser.contextMenus.create({
         id: "enableExtension",
         type: "checkbox",
@@ -48,6 +48,49 @@ genericBrowser.storage.sync.get({enableExtension: true, timeType: "main"}).then(
         contexts: ["action"]
     });
 
+
+    genericBrowser.contextMenus.create({
+        id: "badgePosition",
+        title: "Badge position",
+        contexts: ["action"]
+    });
+    genericBrowser.contextMenus.create({
+        id: "topRight",
+        checked: "topRight" === storage.badgePosition,
+        type: "radio",
+        parentId: "badgePosition",
+        title: "Top Right",
+        contexts: ["action"]
+    });
+
+    genericBrowser.contextMenus.create({
+        id: "topLeft",
+        checked: "topLeft" === storage.badgePosition,
+        type: "radio",
+        parentId: "badgePosition",
+        title: "Top Left",
+        contexts: ["action"]
+    });
+
+    genericBrowser.contextMenus.create({
+        id: "bottomRight",
+        checked: "bottomRight" === storage.badgePosition,
+        type: "radio",
+        parentId: "badgePosition",
+        title: "Bottom Right",
+        contexts: ["action"]
+    });
+
+    genericBrowser.contextMenus.create({
+        id: "bottomLeft",
+        checked: "bottomLeft" === storage.badgePosition,
+        type: "radio",
+        parentId: "badgePosition",
+        title: "Bottom Left",
+        contexts: ["action"]
+    });
+
+
 });
 genericBrowser.runtime.onInstalled.addListener(function () {
     genericBrowser.contextMenus.onClicked.addListener(function (info) {
@@ -55,6 +98,8 @@ genericBrowser.runtime.onInstalled.addListener(function () {
             chrome.storage.sync.set({"enableExtension": info.checked}).then();
         } else if (info.parentMenuItemId === "timeType" && !info.wasChecked) {
             chrome.storage.sync.set({"timeType": info.menuItemId}).then();
+        } else if (info.parentMenuItemId === "badgePosition" && !info.wasChecked) {
+            chrome.storage.sync.set({"badgePosition": info.menuItemId}).then();
         }
     });
 });

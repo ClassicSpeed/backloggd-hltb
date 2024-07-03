@@ -2,6 +2,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.7] - 2024-07-02
+
+### Added
+- Option in extension context menu (right-click on the extension icon) to change the badge position
+
 ## [0.6] - 2024-05-28
 
 ### Changed
