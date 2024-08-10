@@ -1,7 +1,7 @@
 {
   "name": "HLTB Extension for Backloggd",
   "description": "This extension shows the normal beat time for Backloggd",
-  "version": "1.0",
+  "version": "1.1",
   "manifest_version": 3,
   "permissions": [
     "contextMenus",
@@ -19,7 +19,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.backloggd.com/*"
+        "https://www.backloggd.com/*",
+        "https://backloggd.com/*"
       ],
       "js": [
         "time-badge.js",
