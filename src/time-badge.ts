@@ -58,7 +58,7 @@ function addTimeBadges() {
 
 async function fetchGameData(gameTitle: string): Promise<HLTBGame | null> {
     if (!(gameTitle in gameCache)) {
-        const response = await fetch(`https://hltb-proxy.fly.dev/v1/query?title=${gameTitle}`);
+        const response = await fetch(`https://hltb-proxy.fly.dev/v1/query?title=${encodeURIComponent(gameTitle)}`);
         const data: HLTBResponse | undefined = await response.json();
         if (!data || data.length === 0 || data[0].beatTime.main.avgSeconds <= 0) {
             gameCache[gameTitle] = null;

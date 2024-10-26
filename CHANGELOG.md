@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2] - 2024-10-??
+
+### Changed
+
+- Fixed HLTB search not escaping strings correctly, resulting in wrong search results.
+
 ## [1.1] - 2024-08-10
 
 ### Changed
