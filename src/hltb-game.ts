@@ -1,6 +1,7 @@
 type HLTBResponse = HLTBData[];
 type HLTBData = {
     gameName: string,
+    gameId: number,
     beatTime: {
         main: { avgSeconds: number },
         extra: { avgSeconds: number },
@@ -16,6 +17,10 @@ class HLTBGame {
 
     get gameName(): string {
         return this.data.gameName;
+    }
+
+    get gameId(): number {
+        return this.data.gameId;
     }
 
     get mainBeatTime(): string {

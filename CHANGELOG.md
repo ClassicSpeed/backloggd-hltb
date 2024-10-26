@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [1.2] - 2024-10-??
 
+### Added
+
+- Time badge will now work as a hyperlink to the game's page on HLTB.
+
 ### Changed
 
 - Fixed HLTB search not escaping strings correctly, resulting in wrong search results.

@@ -45,9 +45,9 @@ function addTimeBadges() {
 
             const badgeDiv = createBadge(gameCover as HTMLElement, storage.badgePosition);
             fetchGameData(gameTitle)
-                .then(response => {
-                    if (response) {
-                        addTimeToBadge(badgeDiv, response, storage.timeType, storage.badgePosition);
+                .then(hltbGame => {
+                    if (hltbGame) {
+                        addTimeToBadge(badgeDiv, hltbGame, storage.timeType, storage.badgePosition);
                     } else {
                         deleteBadge(badgeDiv);
                     }
@@ -106,21 +106,28 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
     badgeDiv.classList.add('time-badge');
     addClassByPosition(badgePosition, badgeDiv);
 
+    const link = document.createElement('a');
+    link.href = 'https://howlongtobeat.com/game/' + hltbGame.gameId;
+    link.target = '_blank';
+
     switch (timeType) {
         case "main":
-            badgeDiv.innerText = hltbGame.mainBeatTime + ' h';
+            link.innerText = hltbGame.mainBeatTime + ' h';
             break;
         case "extra":
-            badgeDiv.innerText = hltbGame.extraBeatTime + ' h';
+            link.innerText = hltbGame.extraBeatTime + ' h';
             break;
         case "completionist":
-            badgeDiv.innerText = hltbGame.completionistBeatTime + ' h';
+            link.innerText = hltbGame.completionistBeatTime + ' h';
             break;
         case "all":
-            badgeDiv.innerText = hltbGame.allBeatTime + ' h';
+            link.innerText = hltbGame.allBeatTime + ' h';
             break;
 
     }
+
+    badgeDiv.innerHTML = '';
+    badgeDiv.appendChild(link);
     badgeDiv.title = `${hltbGame.gameName}`
         + `\n- Main Story: ${hltbGame.mainBeatTime} Hours`
         + `\n- Main + Sides: ${hltbGame.extraBeatTime} Hours`

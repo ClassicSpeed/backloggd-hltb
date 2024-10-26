@@ -51,3 +51,13 @@
     z-index: 6;
     font-weight: 300;
 }
+
+.time-badge a {
+    color: inherit; /* Inherit the color from the parent */
+    text-decoration: none; /* Remove underline */
+}
+
+.time-badge a:hover {
+    color: #99c3ff; /* Change color to blue on hover */
+    text-decoration: underline; /* Add underline on hover */
+}
