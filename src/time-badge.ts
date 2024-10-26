@@ -1,6 +1,7 @@
 let genericBrowser2 = chrome ? chrome : browser;
+let IGDBToHLTB: Record<string, string | null> = {}
 const gameCache: Record<string, HLTBGame | null> = {}
-addTimeBadges();
+refreshTimeBadges();
 
 const mutationCallback = (mutationsList: MutationRecord[]) => {
     mutationsList.forEach(({addedNodes}) => {
@@ -20,10 +21,23 @@ const targetNode = document.documentElement;
 const config = {childList: true, subtree: true};
 observer.observe(targetNode, config);
 
+function saveNameDictionary(record: Record<string, string | null>) {
+    const jsonString = JSON.stringify(record);
+    genericBrowser2.storage.sync.set({'IGDBToHLTB': jsonString}).then(() => {
+        refreshTimeBadges();
+    }).catch(error => {
+        console.error('Error saving data:', error); // Add error handling
+    });
+}
 
 function refreshTimeBadges() {
-    deleteTimeBadges();
-    addTimeBadges();
+    genericBrowser2.storage.sync.get(['IGDBToHLTB']).then(result => {
+        IGDBToHLTB = JSON.parse(result.IGDBToHLTB || '{}');
+        deleteTimeBadges();
+        addTimeBadges();
+    }).catch(error => {
+        console.error('Error retrieving data:', error); // Add error handling
+    });
 }
 
 function deleteTimeBadges() {
@@ -42,14 +56,14 @@ function addTimeBadges() {
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
             const gameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
             if (!gameTitle) return;
-
             const badgeDiv = createBadge(gameCover as HTMLElement, storage.badgePosition);
-            fetchGameData(gameTitle)
+            const realValue = IGDBToHLTB[gameTitle] || gameTitle;
+            fetchGameData(realValue)
                 .then(hltbGame => {
                     if (hltbGame) {
                         addTimeToBadge(badgeDiv, hltbGame, storage.timeType, storage.badgePosition);
                     } else {
-                        showNotFoundOnBadge(badgeDiv);
+                        showNotFoundOnBadge(badgeDiv, gameTitle);
                     }
                 });
         });
@@ -79,11 +93,6 @@ function createBadge(parentElement: HTMLElement, badgePosition: string) {
     badgeDiv.innerText = ' - ';
     parentElement.appendChild(badgeDiv);
     return badgeDiv;
-}
-
-function showNotFoundOnBadge(badgeDiv: HTMLDivElement) {
-    badgeDiv.innerText = '?';
-    badgeDiv.title = 'Game not found on HowLongToBeat';
 }
 
 function addClassByPosition(badgePosition: string, badgeDiv: HTMLDivElement) {
@@ -134,6 +143,20 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
         + `\n- Main + Sides: ${hltbGame.extraBeatTime} Hours`
         + `\n- Completionist: ${hltbGame.completionistBeatTime} Hours`
         + `\n- All Styles: ${hltbGame.allBeatTime} Hours`;
+}
+
+function showNotFoundOnBadge(badgeDiv: HTMLDivElement, originalGameTitle: string) {
+    badgeDiv.innerText = '?';
+    badgeDiv.title = 'Game not found on HowLongToBeat. ' +
+        '\n- Click the question mark to enter the correct game title from HLTB.' +
+        '\n- The title will be saved for future use.';
+    badgeDiv.addEventListener('click', () => {
+        const userInput = prompt('Enter the correct game title from HLTB:');
+        if (userInput) {
+            IGDBToHLTB[originalGameTitle] = userInput;
+            saveNameDictionary(IGDBToHLTB);
+        }
+    });
 }
 
 
