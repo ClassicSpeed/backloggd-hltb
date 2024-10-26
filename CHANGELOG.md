@@ -16,7 +16,6 @@ All notable changes to this project will be documented in this file.
 
 - Fixed HLTB search not escaping strings correctly, resulting in wrong search results.
 - Time badge is no longer removed when the game is not found on HLTB.
-    - instead, it will show a "?" badge and a tooltip with the not found message.
 
 ## [1.1] - 2024-08-10
 
