@@ -49,7 +49,7 @@ function addTimeBadges() {
                     if (hltbGame) {
                         addTimeToBadge(badgeDiv, hltbGame, storage.timeType, storage.badgePosition);
                     } else {
-                        deleteBadge(badgeDiv);
+                        showNotFoundOnBadge(badgeDiv);
                     }
                 });
         });
@@ -81,8 +81,9 @@ function createBadge(parentElement: HTMLElement, badgePosition: string) {
     return badgeDiv;
 }
 
-function deleteBadge(badgeDiv: HTMLDivElement) {
-    badgeDiv.remove();
+function showNotFoundOnBadge(badgeDiv: HTMLDivElement) {
+    badgeDiv.innerText = '?';
+    badgeDiv.title = 'Game not found on HowLongToBeat';
 }
 
 function addClassByPosition(badgePosition: string, badgeDiv: HTMLDivElement) {
