@@ -6,7 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Time badge will now work as a hyperlink to the game's page on HLTB.
+- You can now click on the badge to open the HLTB page for the game.
+- You can also right-click on the badge to change the HLTB name used for the stats
+- If the game is not found on HLTB, the badge will show a question mark.
+    - You can click the "?" on the badge to enter the HLTB name manually.
+    - This will be saved and used everytime you visit backloggd.
 
 ### Changed
 

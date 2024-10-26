@@ -54,16 +54,16 @@ function addTimeBadges() {
             return;
         }
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
-            const gameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
-            if (!gameTitle) return;
+            const originalGameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
+            if (!originalGameTitle) return;
             const badgeDiv = createBadge(gameCover as HTMLElement, storage.badgePosition);
-            const realValue = IGDBToHLTB[gameTitle] || gameTitle;
+            const realValue = IGDBToHLTB[originalGameTitle] || originalGameTitle;
             fetchGameData(realValue)
                 .then(hltbGame => {
                     if (hltbGame) {
-                        addTimeToBadge(badgeDiv, hltbGame, storage.timeType, storage.badgePosition);
+                        addTimeToBadge(badgeDiv, hltbGame, storage.timeType, storage.badgePosition, originalGameTitle);
                     } else {
-                        showNotFoundOnBadge(badgeDiv, gameTitle);
+                        showNotFoundOnBadge(badgeDiv, originalGameTitle);
                     }
                 });
         });
@@ -112,7 +112,7 @@ function addClassByPosition(badgePosition: string, badgeDiv: HTMLDivElement) {
     }
 }
 
-function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: string, badgePosition: string) {
+function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: string, badgePosition: string, originalGameTitle: string) {
     badgeDiv.classList.add('time-badge');
     addClassByPosition(badgePosition, badgeDiv);
 
@@ -133,7 +133,6 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
         case "all":
             link.innerText = hltbGame.allBeatTime + ' h';
             break;
-
     }
 
     badgeDiv.innerHTML = '';
@@ -142,14 +141,25 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
         + `\n- Main Story: ${hltbGame.mainBeatTime} Hours`
         + `\n- Main + Sides: ${hltbGame.extraBeatTime} Hours`
         + `\n- Completionist: ${hltbGame.completionistBeatTime} Hours`
-        + `\n- All Styles: ${hltbGame.allBeatTime} Hours`;
+        + `\n- All Styles: ${hltbGame.allBeatTime} Hours`
+        + '\n\nClick the badge to open the game page on HLTB.'
+        + '\nRight-click the badge to change the game title for HLTB.';
+
+    // Add event listener for right-click
+    badgeDiv.addEventListener('contextmenu', (event) => {
+        event.preventDefault(); // Prevent the default context menu
+        const userInput = prompt('Enter the correct game title from HLTB:');
+        if (userInput) {
+            IGDBToHLTB[originalGameTitle] = userInput;
+            saveNameDictionary(IGDBToHLTB);
+        }
+    });
 }
 
 function showNotFoundOnBadge(badgeDiv: HTMLDivElement, originalGameTitle: string) {
     badgeDiv.innerText = '?';
     badgeDiv.title = 'Game not found on HowLongToBeat. ' +
-        '\n- Click the question mark to enter the correct game title from HLTB.' +
-        '\n- The title will be saved for future use.';
+        '\n- Click the question mark to enter the correct game title from HLTB.';
     badgeDiv.addEventListener('click', () => {
         const userInput = prompt('Enter the correct game title from HLTB:');
         if (userInput) {
