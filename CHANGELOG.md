@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3] - 2025-12-27
+
+### Changed
+
+- Updated to work on the latest version of backloggd.com
+- No longer uses an HLTB Proxy, temporarily switched to data
+  from [this source.](https://github.com/julianxhokaxhiu/hltb-scraper)
+    - The data will be updated for a while until a new proxy is found.
+- Removed "All" category (since it's not included in the new data).
+- Clicking in a badge now opens a new tab with a HLTB search for the game.
+
 ## [1.2] - 2024-10-26
 
 ### Added

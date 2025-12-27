@@ -6,7 +6,6 @@ type HLTBData = {
         main: { avgSeconds: number },
         extra: { avgSeconds: number },
         completionist: { avgSeconds: number },
-        all: { avgSeconds: number }
     }
 };
 
@@ -33,10 +32,6 @@ class HLTBGame {
 
     get completionistBeatTime(): string {
         return formatHours(this.data.beatTime.completionist.avgSeconds / 3600);
-    }
-
-    get allBeatTime(): string {
-        return formatHours(this.data.beatTime.all.avgSeconds / 3600);
     }
 }
 

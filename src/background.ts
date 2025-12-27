@@ -49,14 +49,6 @@ function generateMenu() {
                 contexts: ["action"]
             });
             genericBrowser.contextMenus.create({
-                id: "all",
-                checked: "all" === storage.timeType,
-                type: "radio",
-                parentId: "timeType",
-                title: "All Styles",
-                contexts: ["action"]
-            });
-            genericBrowser.contextMenus.create({
                 id: "badgePosition",
                 title: "Badge position",
                 contexts: ["action"]

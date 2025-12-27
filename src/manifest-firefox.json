@@ -8,7 +8,9 @@
     "storage"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
@@ -41,6 +43,15 @@
     "gecko": {
       "id": "hltb.backloggd@classic.com"
     }
-  }
-
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "data/howlongtobeat_games.csv"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
 }

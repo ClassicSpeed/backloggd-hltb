@@ -1,20 +1,25 @@
 let genericBrowser2 = chrome ? chrome : browser;
 let IGDBToHLTB: Record<string, string | null> = {}
 const gameCache: Record<string, HLTBGame | null> = {}
+const games: Record<string, HLTBGame> = {};
 refreshTimeBadges();
 
 const mutationCallback = (mutationsList: MutationRecord[]) => {
-    mutationsList.forEach(({addedNodes}) => {
-        Array.from(addedNodes).forEach(node => {
-            if (node instanceof HTMLElement) {
-                const gameCovers = node.querySelectorAll('.game-cover');
-                const hasProgressBar = node.previousElementSibling?.classList.contains('turbolinks-progress-bar');
-                if (gameCovers.length > 0 && hasProgressBar) {
-                    refreshTimeBadges();
+    // Check if the main HTML element has ariaBusy set to 'true'
+    const hasProgressBar = document.documentElement.ariaBusy === 'true';
+
+    if (hasProgressBar) {
+        mutationsList.forEach(({addedNodes}) => {
+            Array.from(addedNodes).forEach(node => {
+                if (node instanceof HTMLElement) {
+                    const gameCovers = node.querySelectorAll('.game-cover');
+                    if (gameCovers.length > 0) {
+                        refreshTimeBadges();
+                    }
                 }
-            }
+            });
         });
-    });
+    }
 };
 const observer = new MutationObserver(mutationCallback);
 const targetNode = document.documentElement;
@@ -70,15 +75,34 @@ function addTimeBadges() {
     });
 }
 
+
 async function fetchGameData(gameTitle: string): Promise<HLTBGame | null> {
-    if (!(gameTitle in gameCache)) {
-        const response = await fetch(`https://hltb-proxy.fly.dev/v1/query?title=${encodeURIComponent(gameTitle)}`);
-        const data: HLTBResponse | undefined = await response.json();
-        if (!data || data.length === 0 || data[0].beatTime.main.avgSeconds <= 0) {
-            gameCache[gameTitle] = null;
-        } else {
-            gameCache[gameTitle] = new HLTBGame(data[0]);
+    if (games["Hollow Knight"] == undefined) {
+
+        const filePath = chrome.runtime.getURL("data/howlongtobeat_games.csv");
+        const response = await fetch(filePath);
+        const text = await response.text();
+        const lines = text.split('\n');
+
+        for (const line of lines) {
+            const [id, title, mainTime, extraTime, completionistTime] = line.split(',');
+            if (title === undefined || id === undefined || mainTime === undefined || extraTime === undefined || completionistTime === undefined)
+                continue;
+            games[title.replace(/"/g, '')] = new HLTBGame({
+                gameId: parseInt(id.replace(/"/g, '')),
+                gameName: title.replace(/"/g, ''),
+                beatTime: {
+                    main: {avgSeconds: parseInt(mainTime.replace(/"/g, '')) || 0},
+                    extra: {avgSeconds: parseInt(extraTime.replace(/"/g, '')) || 0},
+                    completionist: {avgSeconds: parseInt(completionistTime.replace(/"/g, '')) || 0},
+                },
+            });
         }
+    }
+
+    if (!(gameTitle in gameCache)) {
+
+        gameCache[gameTitle] = games[gameTitle] || null;
     }
     return gameCache[gameTitle];
 }
@@ -117,8 +141,10 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
     addClassByPosition(badgePosition, badgeDiv);
 
     const link = document.createElement('a');
-    link.href = 'https://howlongtobeat.com/game/' + hltbGame.gameId;
-    link.target = '_blank';
+    if (hltbGame.gameId != 0) {
+        link.href = 'https://howlongtobeat.com/?q=' + encodeURIComponent(hltbGame.gameName).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
+        link.target = '_blank';
+    }
 
     switch (timeType) {
         case "main":
@@ -130,9 +156,6 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
         case "completionist":
             link.innerText = hltbGame.completionistBeatTime + ' h';
             break;
-        case "all":
-            link.innerText = hltbGame.allBeatTime + ' h';
-            break;
     }
 
     badgeDiv.innerHTML = '';
@@ -141,7 +164,6 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
         + `\n- Main Story: ${hltbGame.mainBeatTime} Hours`
         + `\n- Main + Sides: ${hltbGame.extraBeatTime} Hours`
         + `\n- Completionist: ${hltbGame.completionistBeatTime} Hours`
-        + `\n- All Styles: ${hltbGame.allBeatTime} Hours`
         + '\n\nClick the badge to open the game page on HLTB.'
         + '\nRight-click the badge to change the game title for HLTB.';
 
