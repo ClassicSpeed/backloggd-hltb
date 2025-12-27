@@ -70,6 +70,9 @@ function addTimeBadges() {
                     } else {
                         showNotFoundOnBadge(badgeDiv, originalGameTitle);
                     }
+                }).catch(failed => {
+                    console.error(`fetchGameData failed: Error: \n${failed}`);
+                    errorOnBadge(badgeDiv)
                 });
         });
     });
@@ -191,6 +194,12 @@ function showNotFoundOnBadge(badgeDiv: HTMLDivElement, originalGameTitle: string
     });
 }
 
+function errorOnBadge(badgeDiv: HTMLDivElement) {
+    badgeDiv.innerText = '⦸';
+    badgeDiv.title = 'Unable to Fetch Data from HowLongToBeat-Proxy-API' +
+        '\nThis usually indicates that the HowLongToBeat-Proxy-API is not working right now. This is outside the extensions control' +
+        "\nPlease Try again at a (much) later time.";
+}
 
 genericBrowser2.storage.onChanged.addListener(function (changes) {
     if ("enableExtension" in changes) {
