@@ -31,10 +31,9 @@ async function fetchHltbKey(): Promise<void> {
             fetchingHltbKey = null;
         })();
     }
-// Wait for the ongoing fetch to complete
+    // Wait for the ongoing fetch to complete
     return fetchingHltbKey;
 }
-
 
 genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     (async () => {
@@ -69,14 +68,27 @@ genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => 
             };
 
             // Fetch game data
-            const response = await fetch(`https://howlongtobeat.com/api/search`, {
+            let response = await fetch(`https://howlongtobeat.com/api/search`, {
                 method: "POST",
                 headers: {...headers, "x-auth-token": hltbKey},
                 body: JSON.stringify(body),
             });
 
+            // If token is invalid, clear it and retry
+            if (response.status === 403) {
+                hltbKey = null; // Clear the token
+                await fetchHltbKey(); // Refresh the token
+
+                // Retry the game data fetch
+                response = await fetch(`https://howlongtobeat.com/api/search`, {
+                    method: "POST",
+                    headers: {...headers, "x-auth-token": hltbKey},
+                    body: JSON.stringify(body),
+                });
+            }
+
             if (!response.ok) throw new Error(`Failed to fetch game data: ${response.status}`);
-            sendResponse({ success: true, data: await response.json() });
+            sendResponse({success: true, data: await response.json()});
         } catch (error: any) {
             sendResponse({success: false, error: error.message});
         }
