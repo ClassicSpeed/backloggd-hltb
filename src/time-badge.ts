@@ -3,12 +3,6 @@ let IGDBToHLTB: Record<string, string | null> = {}
 const gameCache: Record<string, HLTBGame | null> = {}
 const games: Record<string, HLTBGame> = {};
 
-const headers = {
-    'Referer': 'https://howlongtobeat.com',
-    'Origin': 'https://howlongtobeat.com',
-    'Content-Type': 'application/json',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0'
-};
 refreshTimeBadges();
 
 const mutationCallback = (mutationsList: MutationRecord[]) => {
@@ -57,7 +51,7 @@ function deleteTimeBadges() {
 }
 
 function getTitleName(gameCover: Element) {
-    console.log(gameCover);
+    // console.log(gameCover);
 
     let originalGameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
     if (originalGameTitle)
@@ -109,66 +103,14 @@ function getNormalizedGameName(gameTitle: string) {
         .map(word => `"${word}"`)
         .join(",");
 }
+async function fetchHLTBData(gameName: string): Promise<any> {
 
-async function fetchHLTBKey(): Promise<string> {
     return new Promise((resolve, reject) => {
         // @ts-ignore
         genericBrowser2.runtime.sendMessage(
             {
                 action: "fetchHLTBData",
-                payload: {
-                    url: 'https://howlongtobeat.com/api/search/init?t=' + Date.now(),
-                    method: "GET",
-                    headers,
-                    body: null
-                }
-            },
-            (response: any) => {
-                if (response && response.success) {
-                    resolve(response.data.token);
-                } else {
-                    reject(response?.error || 'Unknown error');
-                }
-            }
-        );
-    });
-}
-
-async function fetchHLTBData(gameName: string, token: string): Promise<any> {
-    const url = `https://howlongtobeat.com/api/search`;
-    const body = {
-        searchType: "games",
-        searchTerms: JSON.parse(`[${gameName}]`),
-        searchPage: 1,
-        size: 20,
-        searchOptions: {
-            games: {
-                userId: 0,
-                platform: "",
-                sortCategory: "popular",
-                rangeCategory: "main",
-                rangeTime: {min: null, max: null},
-                gameplay: {perspective: "", flow: "", genre: "", difficulty: ""},
-                rangeYear: {min: "", max: ""},
-                modifier: ""
-            },
-            users: {sortCategory: "postcount"},
-            lists: {sortCategory: "follows"},
-            filter: "",
-            sort: 0,
-            randomizer: 0
-        },
-        useCache: true
-    }
-    return new Promise((resolve, reject) => {
-        // @ts-ignore
-        genericBrowser2.runtime.sendMessage(
-            {
-                action: "fetchHLTBData",
-                payload: {
-                    url, method: "POST",
-                    headers: {...headers, ...{"x-auth-token": token}}, body
-                }
+                payload: gameName
             },
             (response: any) => {
                 if (response && response.success) {
@@ -183,8 +125,7 @@ async function fetchHLTBData(gameName: string, token: string): Promise<any> {
 
 async function fetchGameData(rawGameTitle: string): Promise<HLTBGame | null> {
     const gameTitle = getNormalizedGameName(rawGameTitle);
-    const hltbKey = await fetchHLTBKey();
-    const hltbData = await fetchHLTBData(gameTitle, hltbKey);
+    const hltbData = await fetchHLTBData(gameTitle);
     if (hltbData.data.length === 0)
         return null;
 
@@ -291,9 +232,9 @@ function showNotFoundOnBadge(badgeDiv: HTMLDivElement, originalGameTitle: string
 
 function errorOnBadge(badgeDiv: HTMLDivElement) {
     badgeDiv.innerText = '⦸';
-    badgeDiv.title = 'Unable to Fetch Data from HowLongToBeat-Proxy-API' +
-        '\nThis usually indicates that the HowLongToBeat-Proxy-API is not working right now. This is outside the extensions control' +
-        "\nPlease Try again at a (much) later time.";
+    badgeDiv.title = 'Unable to Fetch Data from HowLongToBeat API' +
+        '\nThis usually indicates that the HowLongToBea API is not working right now.' +
+        "\nPlease Try again at a later time.";
 }
 
 genericBrowser2.storage.onChanged.addListener(function (changes) {
