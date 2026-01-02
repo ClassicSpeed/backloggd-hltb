@@ -2,6 +2,13 @@ let genericBrowser2 = chrome ? chrome : browser;
 let IGDBToHLTB: Record<string, string | null> = {}
 const gameCache: Record<string, HLTBGame | null> = {}
 const games: Record<string, HLTBGame> = {};
+
+const headers = {
+    'Referer': 'https://howlongtobeat.com',
+    'Origin': 'https://howlongtobeat.com',
+    'Content-Type': 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0'
+};
 refreshTimeBadges();
 
 const mutationCallback = (mutationsList: MutationRecord[]) => {
@@ -71,44 +78,118 @@ function addTimeBadges() {
                         showNotFoundOnBadge(badgeDiv, originalGameTitle);
                     }
                 }).catch(failed => {
-                    console.error(`fetchGameData failed: Error: \n${failed}`);
-                    errorOnBadge(badgeDiv)
-                });
+                console.error(`fetchGameData failed: Error: \n${failed}`);
+                errorOnBadge(badgeDiv)
+            });
         });
     });
 }
 
 
-async function fetchGameData(gameTitle: string): Promise<HLTBGame | null> {
-    if (games["Hollow Knight"] == undefined) {
+function getNormalizedGameName(gameTitle: string) {
+    return gameTitle.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z _0-9`~!@#$%^&*()-=+|\\\]}[{;:'",<.>/?]/gi, '')
+        .toLowerCase()
+        .split(/\s+/)
+        .map(word => `"${word}"`)
+        .join(",");
+}
 
-        const filePath = chrome.runtime.getURL("data/howlongtobeat_games.csv");
-        const response = await fetch(filePath);
-        const text = await response.text();
-        const lines = text.split('\n');
+async function fetchHLTBKey(): Promise<string> {
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+            {
+                action: "fetchHLTBData",
+                payload: {
+                    url: 'https://howlongtobeat.com/api/search/init?t=' + Date.now(),
+                    method: "GET",
+                    headers,
+                    body: null
+                }
+            },
+            (response) => {
+                if (response.success) {
+                    resolve(response.data.token);
+                } else {
+                    reject(response.error);
+                }
+            }
+        );
+    });
+}
 
-        for (const line of lines) {
-            const [id, title, mainTime, extraTime, completionistTime] = line.split(',');
-            if (title === undefined || id === undefined || mainTime === undefined || extraTime === undefined || completionistTime === undefined)
-                continue;
-            games[title.replace(/"/g, '')] = new HLTBGame({
-                gameId: parseInt(id.replace(/"/g, '')),
-                gameName: title.replace(/"/g, ''),
-                beatTime: {
-                    main: {avgSeconds: parseInt(mainTime.replace(/"/g, '')) || 0},
-                    extra: {avgSeconds: parseInt(extraTime.replace(/"/g, '')) || 0},
-                    completionist: {avgSeconds: parseInt(completionistTime.replace(/"/g, '')) || 0},
-                },
-            });
-        }
+async function fetchHLTBData(gameName: string, token: string): Promise<any> {
+    const url = `https://howlongtobeat.com/api/search`;
+    const body = {
+        searchType: "games",
+        searchTerms: JSON.parse(`[${gameName}]`),
+        searchPage: 1,
+        size: 20,
+        searchOptions: {
+            games: {
+                userId: 0,
+                platform: "",
+                sortCategory: "popular",
+                rangeCategory: "main",
+                rangeTime: {min: null, max: null},
+                gameplay: {perspective: "", flow: "", genre: "", difficulty: ""},
+                rangeYear: {min: "", max: ""},
+                modifier: ""
+            },
+            users: {sortCategory: "postcount"},
+            lists: {sortCategory: "follows"},
+            filter: "",
+            sort: 0,
+            randomizer: 0
+        },
+        useCache: true
     }
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+            {
+                action: "fetchHLTBData",
+                payload: {
+                    url, method: "POST",
+                    headers: {...headers, ...{"x-auth-token": token}}, body
+                }
+            },
+            (response) => {
+                if (response.success) {
+                    resolve(response.data);
+                } else {
+                    reject(response.error);
+                }
+            }
+        );
+    });
+}
+
+async function fetchGameData(rawGameTitle: string): Promise<HLTBGame | null> {
+    const gameTitle = getNormalizedGameName(rawGameTitle);
+    const hltbKey = await fetchHLTBKey();
+    const hltbData = await fetchHLTBData(gameTitle, hltbKey);
+    if (hltbData.data.length === 0)
+        return null;
+
+    games[gameTitle] = new HLTBGame({
+        gameId: hltbData.data[0]?.game_id || 0,
+        gameName: hltbData.data[0]?.game_name || gameTitle,
+        beatTime: {
+            main: {avgSeconds: hltbData.data[0]?.comp_main || 0},
+            extra: {avgSeconds: hltbData.data[0]?.comp_plus || 0},
+            completionist: {avgSeconds: hltbData.data[0]?.comp_100 || 0},
+        },
+    });
+
 
     if (!(gameTitle in gameCache)) {
-
         gameCache[gameTitle] = games[gameTitle] || null;
     }
     return gameCache[gameTitle];
 }
+
+
 
 
 function createBadge(parentElement: HTMLElement, badgePosition: string) {

@@ -5,7 +5,11 @@
   "manifest_version": 3,
   "permissions": [
     "contextMenus",
-    "storage"
+    "storage",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://howlongtobeat.com/*"
   ],
   "background": {
     "scripts": [
@@ -22,7 +26,8 @@
     {
       "matches": [
         "https://www.backloggd.com/*",
-        "https://backloggd.com/*"
+        "https://backloggd.com/*",
+        "https://howlongtobeat.com/*"
       ],
       "js": [
         "time-badge.js",
@@ -43,15 +48,5 @@
     "gecko": {
       "id": "hltb.backloggd@classic.com"
     }
-  },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "data/howlongtobeat_games.csv"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
-    }
-  ]
+  }
 }

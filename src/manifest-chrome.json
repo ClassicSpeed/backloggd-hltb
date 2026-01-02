@@ -5,7 +5,11 @@
   "manifest_version": 3,
   "permissions": [
     "contextMenus",
-    "storage"
+    "storage",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://howlongtobeat.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -20,7 +24,8 @@
     {
       "matches": [
         "https://www.backloggd.com/*",
-        "https://backloggd.com/*"
+        "https://backloggd.com/*",
+        "https://howlongtobeat.com/*"
       ],
       "js": [
         "time-badge.js",
@@ -36,15 +41,5 @@
     "default_icon": {
       "128": "icons/icon128.png"
     }
-  },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "data/howlongtobeat_games.csv"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
-    }
-  ]
+  }
 }

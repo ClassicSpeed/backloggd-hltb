@@ -1,9 +1,58 @@
+
 let genericBrowser = chrome ? chrome : browser;
+
 
 genericBrowser.runtime.onInstalled.addListener(generateMenu);
 
 genericBrowser.runtime.onStartup.addListener(generateMenu);
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+    const {url, method, headers, body} = message.payload;
+
+    fetch(url, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+    })
+        .then(async (response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status} when fetching ${url}`);
+            }
+            const data = await response.json();
+            sendResponse({success: true, data});
+        })
+        .catch((error) => {
+            sendResponse({success: false, error: error.message});
+        });
+
+    return true;
+
+});
+chrome.runtime.onInstalled.addListener(() => {
+
+    const rules: any = [
+        {
+            "id": 1,
+            "priority": 1,
+            "action": {
+                "type": "modifyHeaders",
+                "requestHeaders": [
+                    { "header": "Referer", "operation": "set", "value": "https://howlongtobeat.com" },
+                    { "header": "Origin", "operation": "set", "value": "https://howlongtobeat.com" }
+                ]
+            },
+            "condition": {
+                "urlFilter": "||howlongtobeat.com/*",
+                "resourceTypes": ["xmlhttprequest", "main_frame", "sub_frame"]
+            }
+        }
+    ]
+    chrome.declarativeNetRequest.updateDynamicRules({
+        addRules: rules,
+        removeRuleIds: rules.map((rule:any) => rule.id),
+    });
+});
 function generateMenu() {
     genericBrowser.storage.sync.get({
         enableExtension: true,
