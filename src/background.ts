@@ -6,7 +6,7 @@ genericBrowser.runtime.onInstalled.addListener(generateMenu);
 
 genericBrowser.runtime.onStartup.addListener(generateMenu);
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     const {url, method, headers, body} = message.payload;
 
@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
 
 });
-chrome.runtime.onInstalled.addListener(() => {
+genericBrowser.runtime.onInstalled.addListener(() => {
 
     const rules: any = [
         {
@@ -48,7 +48,7 @@ chrome.runtime.onInstalled.addListener(() => {
             }
         }
     ]
-    chrome.declarativeNetRequest.updateDynamicRules({
+    genericBrowser.declarativeNetRequest.updateDynamicRules({
         addRules: rules,
         removeRuleIds: rules.map((rule:any) => rule.id),
     });

@@ -95,10 +95,10 @@ function getNormalizedGameName(gameTitle: string) {
         .map(word => `"${word}"`)
         .join(",");
 }
-
 async function fetchHLTBKey(): Promise<string> {
     return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage(
+        // @ts-ignore
+        genericBrowser2.runtime.sendMessage(
             {
                 action: "fetchHLTBData",
                 payload: {
@@ -108,11 +108,11 @@ async function fetchHLTBKey(): Promise<string> {
                     body: null
                 }
             },
-            (response) => {
-                if (response.success) {
+            (response: any) => {
+                if (response && response.success) {
                     resolve(response.data.token);
                 } else {
-                    reject(response.error);
+                    reject(response?.error || 'Unknown error');
                 }
             }
         );
@@ -146,7 +146,8 @@ async function fetchHLTBData(gameName: string, token: string): Promise<any> {
         useCache: true
     }
     return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage(
+        // @ts-ignore
+        genericBrowser2.runtime.sendMessage(
             {
                 action: "fetchHLTBData",
                 payload: {
@@ -154,11 +155,11 @@ async function fetchHLTBData(gameName: string, token: string): Promise<any> {
                     headers: {...headers, ...{"x-auth-token": token}}, body
                 }
             },
-            (response) => {
-                if (response.success) {
+            (response: any) => {
+                if (response && response.success) {
                     resolve(response.data);
                 } else {
-                    reject(response.error);
+                    reject(response?.error || 'Unknown error');
                 }
             }
         );
