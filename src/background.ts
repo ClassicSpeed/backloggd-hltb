@@ -1,4 +1,5 @@
 let genericBrowser = chrome ? chrome : browser;
+const gameCache: Record<string, unknown | null> = {}
 
 const headers: any = {
     'Referer': 'https://howlongtobeat.com',
@@ -37,6 +38,14 @@ async function fetchHltbKey(): Promise<void> {
 
 genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     (async () => {
+
+        const gameTitle = message.payload;
+        if (gameTitle in gameCache) {
+            sendResponse({success: true, data: gameCache[gameTitle]});
+            return true;
+        }
+
+
         try {
             // Fetch token if not already available
             await fetchHltbKey();
@@ -88,7 +97,19 @@ genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => 
             }
 
             if (!response.ok) throw new Error(`Failed to fetch game data: ${response.status}`);
-            sendResponse({success: true, data: await response.json()});
+
+
+            const responseData = await response.json()
+
+            if (responseData.data.length === 0) {
+                sendResponse({success: true, game: null});
+                return true;
+            }
+            if (!(gameTitle in gameCache)) {
+                gameCache[gameTitle] = responseData.data[0];
+            }
+
+            sendResponse({success: true, data: responseData.data[0]});
         } catch (error: any) {
             sendResponse({success: false, error: error.message});
         }

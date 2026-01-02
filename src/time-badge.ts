@@ -1,7 +1,5 @@
 let genericBrowser2 = chrome ? chrome : browser;
 let IGDBToHLTB: Record<string, string | null> = {}
-const gameCache: Record<string, HLTBGame | null> = {}
-const games: Record<string, HLTBGame> = {};
 
 refreshTimeBadges();
 
@@ -103,6 +101,7 @@ function getNormalizedGameName(gameTitle: string) {
         .map(word => `"${word}"`)
         .join(",");
 }
+
 async function fetchHLTBData(gameName: string): Promise<any> {
 
     return new Promise((resolve, reject) => {
@@ -126,24 +125,20 @@ async function fetchHLTBData(gameName: string): Promise<any> {
 async function fetchGameData(rawGameTitle: string): Promise<HLTBGame | null> {
     const gameTitle = getNormalizedGameName(rawGameTitle);
     const hltbData = await fetchHLTBData(gameTitle);
-    if (hltbData.data.length === 0)
+    if(!hltbData){
         return null;
+    }
 
-    games[gameTitle] = new HLTBGame({
-        gameId: hltbData.data[0]?.game_id || 0,
-        gameName: hltbData.data[0]?.game_name || gameTitle,
+
+    return new HLTBGame({
+        gameId: hltbData?.game_id || 0,
+        gameName: hltbData?.game_name || gameTitle,
         beatTime: {
-            main: {avgSeconds: hltbData.data[0]?.comp_main || 0},
-            extra: {avgSeconds: hltbData.data[0]?.comp_plus || 0},
-            completionist: {avgSeconds: hltbData.data[0]?.comp_100 || 0},
+            main: {avgSeconds: hltbData?.comp_main || 0},
+            extra: {avgSeconds: hltbData?.comp_plus || 0},
+            completionist: {avgSeconds: hltbData?.comp_100 || 0},
         },
     });
-
-
-    if (!(gameTitle in gameCache)) {
-        gameCache[gameTitle] = games[gameTitle] || null;
-    }
-    return gameCache[gameTitle];
 }
 
 
