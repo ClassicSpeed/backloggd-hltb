@@ -4,7 +4,7 @@ let IGDBToHLTB: Record<string, string | null> = {}
 refreshTimeBadges();
 
 const mutationCallback = (mutationsList: MutationRecord[]) => {
-    mutationsList.forEach(({ type, target, addedNodes }) => {
+    mutationsList.forEach(({type, target, addedNodes}) => {
         if (type === 'attributes' && target instanceof HTMLElement && target.classList.contains('game-cover')) {
             refreshTimeBadges();
         } else if (type === 'childList') {
@@ -31,6 +31,7 @@ function saveNameDictionary(record: Record<string, string | null>) {
         console.error('Error saving data:', error); // Add error handling
     });
 }
+
 function refreshTimeBadges() {
     genericBrowser2.storage.sync.get(['IGDBToHLTB']).then(result => {
         IGDBToHLTB = JSON.parse(result.IGDBToHLTB || '{}');
@@ -81,7 +82,7 @@ function addTimeBadges() {
                         showNotFoundOnBadge(badgeDiv, originalGameTitle);
                     }
                 }).catch(failed => {
-                console.error(`fetchGameData failed: Error: \n${failed}`);
+                console.error(`FetchGameData failed: Error: \n${failed}`);
                 errorOnBadge(badgeDiv)
             });
         });
@@ -122,7 +123,7 @@ async function fetchHLTBData(gameName: string): Promise<any> {
 async function fetchGameData(rawGameTitle: string): Promise<HLTBGame | null> {
     const gameTitle = getNormalizedGameName(rawGameTitle);
     const hltbData = await fetchHLTBData(gameTitle);
-    if(!hltbData){
+    if (!hltbData) {
         return null;
     }
 
@@ -173,10 +174,8 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
     addClassByPosition(badgePosition, badgeDiv);
 
     const link = document.createElement('a');
-    if (hltbGame.gameId != 0) {
-        link.href = 'https://howlongtobeat.com/?q=' + encodeURIComponent(hltbGame.gameName).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
-        link.target = '_blank';
-    }
+    link.href = 'https://howlongtobeat.com/game/' + hltbGame.gameId;
+    link.target = '_blank';
 
     switch (timeType) {
         case "main":
