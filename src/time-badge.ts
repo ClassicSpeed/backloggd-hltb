@@ -56,6 +56,18 @@ function deleteTimeBadges() {
     document.querySelectorAll('.time-badge').forEach(timeBadge => timeBadge.remove());
 }
 
+function getTitleName(gameCover: Element) {
+    console.log(gameCover);
+
+    let originalGameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
+    if (originalGameTitle)
+        return originalGameTitle;
+
+    originalGameTitle = gameCover.closest('.row')?.querySelector('.col.d-block.d-md-none .game-title-section h1')?.textContent?.trim();
+
+    return originalGameTitle;
+}
+
 function addTimeBadges() {
     genericBrowser2.storage.sync.get({
         timeType: "main",
@@ -66,8 +78,10 @@ function addTimeBadges() {
             return;
         }
         document.querySelectorAll('.game-cover').forEach((gameCover) => {
-            const originalGameTitle = gameCover.querySelector('.overflow-wrapper')?.querySelector('.card-img')?.getAttribute("alt");
-            if (!originalGameTitle) return;
+            const originalGameTitle = getTitleName(gameCover);
+
+            if (!originalGameTitle)
+                return;
             const badgeDiv = createBadge(gameCover as HTMLElement, storage.badgePosition);
             const realValue = IGDBToHLTB[originalGameTitle] || originalGameTitle;
             fetchGameData(realValue)
@@ -95,6 +109,7 @@ function getNormalizedGameName(gameTitle: string) {
         .map(word => `"${word}"`)
         .join(",");
 }
+
 async function fetchHLTBKey(): Promise<string> {
     return new Promise((resolve, reject) => {
         // @ts-ignore
@@ -189,8 +204,6 @@ async function fetchGameData(rawGameTitle: string): Promise<HLTBGame | null> {
     }
     return gameCache[gameTitle];
 }
-
-
 
 
 function createBadge(parentElement: HTMLElement, badgePosition: string) {
