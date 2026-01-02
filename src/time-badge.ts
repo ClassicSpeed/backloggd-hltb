@@ -4,21 +4,19 @@ let IGDBToHLTB: Record<string, string | null> = {}
 refreshTimeBadges();
 
 const mutationCallback = (mutationsList: MutationRecord[]) => {
-    // Check if the main HTML element has ariaBusy set to 'true'
-    const hasProgressBar = document.documentElement.ariaBusy === 'true';
-
-    if (hasProgressBar) {
-        mutationsList.forEach(({addedNodes}) => {
+    mutationsList.forEach(({ type, target, addedNodes }) => {
+        if (type === 'attributes' && target instanceof HTMLElement && target.classList.contains('game-cover')) {
+            refreshTimeBadges();
+        } else if (type === 'childList') {
             Array.from(addedNodes).forEach(node => {
                 if (node instanceof HTMLElement) {
-                    const gameCovers = node.querySelectorAll('.game-cover');
-                    if (gameCovers.length > 0) {
+                    if (node.classList.contains('game-cover') || node.querySelector('.game-cover')) {
                         refreshTimeBadges();
                     }
                 }
             });
-        });
-    }
+        }
+    });
 };
 const observer = new MutationObserver(mutationCallback);
 const targetNode = document.documentElement;
@@ -33,7 +31,6 @@ function saveNameDictionary(record: Record<string, string | null>) {
         console.error('Error saving data:', error); // Add error handling
     });
 }
-
 function refreshTimeBadges() {
     genericBrowser2.storage.sync.get(['IGDBToHLTB']).then(result => {
         IGDBToHLTB = JSON.parse(result.IGDBToHLTB || '{}');
