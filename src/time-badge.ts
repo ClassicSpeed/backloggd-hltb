@@ -137,6 +137,7 @@ async function fetchGameData(rawGameTitle: string): Promise<HLTBGame | null> {
             main: {avgSeconds: hltbData?.comp_main || 0},
             extra: {avgSeconds: hltbData?.comp_plus || 0},
             completionist: {avgSeconds: hltbData?.comp_100 || 0},
+            all: {avgSeconds: hltbData?.comp_all || 0},
         },
     });
 }
@@ -190,6 +191,9 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
         case "completionist":
             link.innerText = hltbGame.completionistBeatTime + ' h';
             break;
+        case "all":
+            link.innerText = hltbGame.allBeatTime + ' h';
+            break;
     }
 
     badgeDiv.innerHTML = '';
@@ -198,6 +202,7 @@ function addTimeToBadge(badgeDiv: HTMLDivElement, hltbGame: HLTBGame, timeType: 
         + `\n- Main Story: ${hltbGame.mainBeatTime} Hours`
         + `\n- Main + Sides: ${hltbGame.extraBeatTime} Hours`
         + `\n- Completionist: ${hltbGame.completionistBeatTime} Hours`
+        + `\n- All Styles: ${hltbGame.allBeatTime} Hours`
         + '\n\nClick the badge to open the game page on HLTB.'
         + '\nRight-click the badge to change the game title for HLTB.';
 
