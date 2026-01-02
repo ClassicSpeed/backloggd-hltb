@@ -7,28 +7,42 @@ const headers: any = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0'
 };
 let hltbKey: string | null = null;
+let fetchingHltbKey: Promise<void> | null = null;
 
+async function fetchHltbKey(): Promise<void> {
+    if (hltbKey) {
+        // Token already fetched
+        return;
+    }
 
-//Message Get HLTB info
-// If token undefined, call to get the token
-// If token in waiting, wait for it to get resolved
+    if (!fetchingHltbKey) {
+        fetchingHltbKey = (async () => {
+            const tokenResponse = await fetch(`https://howlongtobeat.com/api/search/init?t=${Date.now()}`, {
+                method: "GET",
+                headers,
+            });
+            if (!tokenResponse.ok) {
+                fetchingHltbKey = null; // Reset fetching state on failure
+                throw new Error(`HTTP error! Status: ${tokenResponse.status} when fetching HLTB key`);
+            }
+            const data = await tokenResponse.json();
+            hltbKey = data.token;
+            // Clear fetching state after success
+            fetchingHltbKey = null;
+        })();
+    }
+// Wait for the ongoing fetch to complete
+    return fetchingHltbKey;
+}
+
 
 genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     (async () => {
         try {
-            if (!hltbKey) {
-                const tokenResponse: Response = await fetch('https://howlongtobeat.com/api/search/init?t=' + Date.now(), {
-                    method: "GET",
-                    headers: headers,
-                });
-                if (!tokenResponse.ok) {
-                    throw new Error(`HTTP error! Status: ${tokenResponse.status} when fetching HLTB key`);
-                }
-                const data = await tokenResponse.json();
-                hltbKey = data.token;
-            }
+            // Fetch token if not already available
+            await fetchHltbKey();
 
-            const url = `https://howlongtobeat.com/api/search`;
+            // Prepare request body
             const body = {
                 searchType: "games",
                 searchTerms: JSON.parse(`[${message.payload}]`),
@@ -54,17 +68,15 @@ genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => 
                 useCache: true
             };
 
-            const response = await fetch(url, {
+            // Fetch game data
+            const response = await fetch(`https://howlongtobeat.com/api/search`, {
                 method: "POST",
                 headers: {...headers, "x-auth-token": hltbKey},
                 body: JSON.stringify(body),
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status} when fetching ${url}`);
-            }
-            const data = await response.json();
-            sendResponse({success: true, data});
+            if (!response.ok) throw new Error(`Failed to fetch game data: ${response.status}`);
+            sendResponse({ success: true, data: await response.json() });
         } catch (error: any) {
             sendResponse({success: false, error: error.message});
         }
@@ -74,40 +86,6 @@ genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => 
 
 });
 
-/*
-
-genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "getHLTBKey") {
-        sendResponse({key: hltbKey});
-        return;
-    } else if (message.action === "setHLTBKey") {
-        hltbKey = message.key;
-        sendResponse({success: true});
-        return;
-    }
-
-
-    const {url, method, headers, body} = message.payload;
-
-    fetch(url, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : undefined,
-    })
-        .then(async (response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status} when fetching ${url}`);
-            }
-            const data = await response.json();
-            sendResponse({success: true, data});
-        })
-        .catch((error) => {
-            sendResponse({success: false, error: error.message});
-        });
-
-    return true;
-
-});*/
 genericBrowser.runtime.onInstalled.addListener(() => {
 
     const rules: any = [
