@@ -1,17 +1,23 @@
 # Change Log
 
 All notable changes to this project will be documented in this file.
+
+## [1.5] - 2026-02-11
+
+- Fixed path for HLTB Api.
+
 ## [1.4] - 2026-01-02
 
 ### Added
+
 - Now uses HLTB Api directly.
 - Game's main page and related games will now show the time badges too.
 - Added "All" category back.
 
 ### Changed
+
 - Fixed game cache not working.
 - Reduced the amount of refreshes needed to load the badges.
-
 
 ## [1.3] - 2025-12-27
 
