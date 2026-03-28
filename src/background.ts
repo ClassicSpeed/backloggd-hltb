@@ -8,6 +8,8 @@ const headers: any = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0'
 };
 let hltbKey: string | null = null;
+let hltbHpKey: string | null = null;
+let hltbHpVal: string | null = null;
 let fetchingHltbKey: Promise<void> | null = null;
 
 async function fetchHltbKey(): Promise<void> {
@@ -18,7 +20,7 @@ async function fetchHltbKey(): Promise<void> {
 
     if (!fetchingHltbKey) {
         fetchingHltbKey = (async () => {
-            const tokenResponse = await fetch(`https://howlongtobeat.com/api/finder/init?t=${Date.now()}`, {
+            const tokenResponse = await fetch(`https://howlongtobeat.com/api/find/init?t=${Date.now()}`, {
                 method: "GET",
                 headers,
             });
@@ -28,6 +30,8 @@ async function fetchHltbKey(): Promise<void> {
             }
             const data = await tokenResponse.json();
             hltbKey = data.token;
+            hltbHpKey = data.hpKey;
+            hltbHpVal = data.hpVal;
             // Clear fetching state after success
             fetchingHltbKey = null;
         })();
@@ -76,10 +80,15 @@ genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => 
                 useCache: true
             };
 
+            if (hltbHpKey && hltbHpVal) {
+                // @ts-ignore
+                body[hltbHpKey] = hltbHpVal
+            }
+
             // Fetch game data
-            let response = await fetch(`https://howlongtobeat.com/api/finder`, {
+            let response = await fetch(`https://howlongtobeat.com/api/find`, {
                 method: "POST",
-                headers: {...headers, "x-auth-token": hltbKey},
+                headers: {...headers, "x-auth-token": hltbKey, "x-hp-key": hltbHpKey, "x-hp-val": hltbHpVal},
                 body: JSON.stringify(body),
             });
 
@@ -89,9 +98,9 @@ genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => 
                 await fetchHltbKey(); // Refresh the token
 
                 // Retry the game data fetch
-                response = await fetch(`https://howlongtobeat.com/api/finder`, {
+                response = await fetch(`https://howlongtobeat.com/api/find`, {
                     method: "POST",
-                    headers: {...headers, "x-auth-token": hltbKey},
+                    headers: {...headers, "x-auth-token": hltbKey, "x-hp-key": hltbHpKey, "x-hp-val": hltbHpVal},
                     body: JSON.stringify(body),
                 });
             }
