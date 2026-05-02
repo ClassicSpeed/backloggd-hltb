@@ -20,7 +20,7 @@ async function fetchHltbKey(): Promise<void> {
 
     if (!fetchingHltbKey) {
         fetchingHltbKey = (async () => {
-            const tokenResponse = await fetch(`https://howlongtobeat.com/api/find/init?t=${Date.now()}`, {
+            const tokenResponse = await fetch(`https://howlongtobeat.com/api/bleed/init?t=${Date.now()}`, {
                 method: "GET",
                 headers,
             });
@@ -86,7 +86,7 @@ genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => 
             }
 
             // Fetch game data
-            let response = await fetch(`https://howlongtobeat.com/api/find`, {
+            let response = await fetch(`https://howlongtobeat.com/api/bleed`, {
                 method: "POST",
                 headers: {...headers, "x-auth-token": hltbKey, "x-hp-key": hltbHpKey, "x-hp-val": hltbHpVal},
                 body: JSON.stringify(body),
@@ -98,7 +98,7 @@ genericBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => 
                 await fetchHltbKey(); // Refresh the token
 
                 // Retry the game data fetch
-                response = await fetch(`https://howlongtobeat.com/api/find`, {
+                response = await fetch(`https://howlongtobeat.com/api/bleed`, {
                     method: "POST",
                     headers: {...headers, "x-auth-token": hltbKey, "x-hp-key": hltbHpKey, "x-hp-val": hltbHpVal},
                     body: JSON.stringify(body),
