@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "zip:chorme": "npm run build:chrome && mkdirp out && npm-build-zip --source=dist --destination=out --name=chrome",
+    "zip:chrome": "npm run build:chrome && mkdirp out && npm-build-zip --source=dist --destination=out --name=chrome",
     "zip:firefox": "npm run build:firefox && mkdirp out && npm-build-zip --source=dist --destination=out --name=firefox",
     "build:chrome": "npm run build:shared && renamer dist/manifest-chrome.json --replace manifest.json && rimraf ./dist/manifest-firefox.json",
     "build:firefox": "npm run build:shared && renamer dist/manifest-firefox.json --replace manifest.json && rimraf ./dist/manifest-chrome.json",
