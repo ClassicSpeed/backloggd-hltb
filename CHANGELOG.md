@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8] - 2026-08-31
+
+- Fixed path for HLTB Api.
+- 
 ## [1.7] - 2026-05-02
 
 - Fixed path for HLTB Api.
